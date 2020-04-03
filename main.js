@@ -1,3 +1,5 @@
+import "./canvas";
+
 
 var socket = new WebSocket("ws://192.168.43.98");
 
@@ -23,4 +25,6 @@ socket.onerror = function(error) {
 };
 
 socket.send("Привет");
+
+
 
