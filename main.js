@@ -1,30 +1,37 @@
-import "./canvas";
 
+console.log("c");
 
-var socket = new WebSocket("ws://192.168.43.98");
+var socket = new WebSocket("ws://192.168.43.209:3333");
 
 socket.onopen = function() {
-    alert("Соединение установлено.");
+    console.log("Соединение установлено.");
+
+
+    socket.send("Привет");
+    startGame();
 };
+
+function startGame(){
+	setInterval(cicle, 30);
+}
+
+function cicle(){
+	socket.send("1");
+}
 
 socket.onclose = function(event) {
     if (event.wasClean) {
-        alert('Соединение закрыто чисто');
+        console.log('Соединение закрыто чисто');
     } else {
-        alert('Обрыв соединения'); // например, "убит" процесс сервера
+        console.log('Обрыв соединения'); // например, "убит" процесс сервера
     }
-    alert('Код: ' + event.code + ' причина: ' + event.reason);
+    console.log('Код: ' + event.code + ' причина: ' + event.reason);
 };
 
 socket.onmessage = function(event) {
-    alert("Получены данные " + event.data);
+    console.log("Получены данные " + event.data);
 };
 
 socket.onerror = function(error) {
-    alert("Ошибка " + error.message);
+    console.log("Ошибка " + error.message);
 };
-
-socket.send("Привет");
-
-
-
