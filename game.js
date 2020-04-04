@@ -5,6 +5,85 @@ var winH = 500;
 var winW = 500;
 var UPDATE_MILLIS = 20;
 var FONT_NAME = "Arial";
+var nickname = "Andrey";
+
+
+class SocketConnector {
+	constructor(host, port){
+		this.host = host;
+		this.port = port;
+	}
+
+	connect(onmessage) {
+		this.mockConnect(onmessage);
+		return;//TODO
+
+	    let address = "ws://"+this.host+":"+this.port;
+	    console.log("Connecting... "+ address);
+
+        this.socket = new WebSocket(address);
+
+        this.socket.onopen = function() {
+          console.log("Соединение установлено.");
+
+          socket.send("Привет");
+        };
+
+        this.socket.onclose = function(event) {
+          if (event.wasClean) {
+           console.log('Соединение закрыто чисто');
+          } else {
+            console.log('Обрыв соединения'); // например, "убит" процесс сервера
+          }
+          console.log('Код: ' + event.code + ' причина: ' + event.reason);
+        };
+
+        this.socket.onmessage = function(event) {
+          console.log("Получены данные " + event.data);
+          onmessage(event.data);
+        };
+
+        this.socket.onerror = function(error) {
+          console.log("Ошибка " + error.message);
+        };
+	}
+
+	send(message) {
+		this.mockSend(message);
+		return;//TODO
+		this.socket.send(message);
+	}
+
+	mockConnect(onmessage) {
+		this.players = [];
+
+		for(let i = 0; i<4; i++) {
+		   let p = {};
+		   p.player = "A"+i;
+		   p.x = 0.1*i;
+		   p.y = 0.1*i;
+		   this.players.push(p);
+	    }
+	
+
+		let cicle = (e)=> {
+			for(let i = 0; i<this.players.length; i++) {
+		       let p = this.players[i];
+		       p.x = p.x+0.0001*(i+1);
+		       p.y = p.y+0.0002*(i+1);
+	        }
+
+			var dat = JSON.stringify(this.players);
+			onmessage(dat);
+		}
+
+		setInterval(cicle, 30);
+	}
+
+	mockSend(message) {
+		//console.log(message);
+	}
+}
 
 class Bullet {
 	constructor(x, y, dx, dy){
@@ -67,6 +146,16 @@ class Player {
 		this.speed = 5;
 	}
 
+	sync(connector) {
+		let p = {};
+		p.player = nickname;
+		p.x = this.x/winW;
+		p.y = this.y/winH;
+
+		let data = JSON.stringify(p);
+		connector.send(data);
+	}
+
 	update(client) {
 		let mouse = client.mouse;
 
@@ -82,12 +171,11 @@ class Player {
 
 		this.x = this.x + this.dx;
 		this.y = this.y + this.dy;
-
-		moveIfOutside(this);
 	}
 
 	render(ctx) {
 		ctx.fillStyle = this.color;
+		ctx.fillText(nickname, this.x, this.y);
         ctx.fillRect(this.x, this.y, this.h, this.w);
 	}
 }
@@ -123,11 +211,21 @@ class Mouse {
 }
 
 var player = new Player();
+let allPlayers = [];
+
 var bullets = [];
 var bulletSpeed = 10;
 var client = new Client();
 
 setInterval(render, UPDATE_MILLIS);
+
+var connector = new SocketConnector("192.168.2.2", "4444");
+
+var onmessage = function(data) {
+    allPlayers = JSON.parse(data);
+};
+
+connector.connect(onmessage);
 
 document.getElementById("canvas").addEventListener("mousemove", function(event) { 
 	client.mouse.update(event); 
@@ -150,9 +248,11 @@ document.getElementById("canvas").addEventListener("click", function(event) {
 function render() {
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    player.sync(connector);
 	player.update(client);
 	player.render(ctx);
 	renderBullets();
+	renderAllPlayers();
 }
 
 function renderBullets() {
@@ -160,6 +260,20 @@ function renderBullets() {
 		let b = bullets[i];
 		b.update();
 		b.render(ctx);
+	}
+}
+
+function renderAllPlayers() {
+	for(let i = 0; i<allPlayers.length; i++) {
+		let p = allPlayers[i];
+
+		if (p.player == nickname) { continue; }//TODO
+
+		ctx.fillStyle = "red";
+		let x = p.x*winW;
+		let y = p.y*winH;
+		ctx.fillText(p.player, x, y);
+        ctx.fillRect(x, y, 25, 25)
 	}
 }
 
