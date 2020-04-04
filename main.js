@@ -1,6 +1,4 @@
 
-console.log("c");
-
 var socket = new WebSocket("ws://192.168.43.209:3333");
 
 socket.onopen = function() {
