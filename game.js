@@ -23,10 +23,10 @@ class SocketConnector {
 
         this.socket = new WebSocket(address);
 
-        this.socket.onopen = function() {
+        this.socket.onopen = () => {
           console.log("Соединение установлено.");
 
-          socket.send("Привет");
+          this.socket.send("Привет");
         };
 
         this.socket.onclose = function(event) {
@@ -51,11 +51,13 @@ class SocketConnector {
 	send(message) {
 		this.mockSend(message);
 		return;//TODO
+		
 		this.socket.send(message);
 	}
 
 	mockConnect(onmessage) {
 		this.players = [];
+		this.bullets = [];
 
 		for(let i = 0; i<4; i++) {
 		   let p = {};
@@ -72,6 +74,10 @@ class SocketConnector {
 		       p.x = p.x+0.0001*(i+1);
 		       p.y = p.y+0.0002*(i+1);
 	        }
+
+	        var obj = {};
+	        obj.players = this.players;
+	        
 
 			var dat = JSON.stringify(this.players);
 			onmessage(dat);
@@ -159,15 +165,15 @@ class Player {
 	update(client) {
 		let mouse = client.mouse;
 
-        let xr = mouse.x - (this.x + this.cW);
-        let yr = mouse.y - (this.y + this.cH);
-        let g = Math.sqrt(Math.pow(xr, 2)+Math.pow(yr, 2));
+        let xCenter = mouse.x - (this.x + this.cW);
+        let yCenter = mouse.y - (this.y + this.cH);
+        let rangeToMouse = Math.sqrt(Math.pow(xCenter, 2)+Math.pow(yCenter, 2));
 
-        if(g<5) return;
-        let k = this.speed/g;
+        if(rangeToMouse<this.speed) return;
+        let k = this.speed/rangeToMouse;
 
-	    this.dx = k*xr;
-	    this.dy = k*yr;
+	    this.dx = k*xCenter;
+	    this.dy = k*yCenter;
 
 		this.x = this.x + this.dx;
 		this.y = this.y + this.dy;
@@ -219,7 +225,7 @@ var client = new Client();
 
 setInterval(render, UPDATE_MILLIS);
 
-var connector = new SocketConnector("192.168.2.2", "4444");
+var connector = new SocketConnector("172.20.10.2", "3333");
 
 var onmessage = function(data) {
     allPlayers = JSON.parse(data);
