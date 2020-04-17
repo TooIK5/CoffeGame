@@ -3,9 +3,26 @@
 	<head>
     	<meta charset="UTF-8">
     	<title>Title</title>
+    	<link rel="stylesheet" type="text/css" href="style.css">
 	</head>
 
 	<body>
+		<form id="nameform">
+			<label for="ismock">Is Offline Test:</label>
+  			<input type="checkbox" id="ismock" name="ismock">
+
+			<label for="host" class="address">Host:</label>
+  			<input type="text" class="address" id="host" name="host" value="25.133.73.193">
+
+  			<label for="port" class="address">Port:</label>
+  			<input type="text" class="address" id="port" name="port" value="1333"><br><br>
+
+  			<label for="name">Name:</label>
+  			<input type="text" id="name" name="name" value="Player">
+
+  			<input type="button" id="start" value="start">
+		</form>
+
 		<canvas id="canvas" width="500" height="500" style="border:1px solid #d3d3d3;"></canvas>
 
 		<script type="text/javascript" src="utils.js"></script>
@@ -13,6 +30,7 @@
 		<script type="text/javascript" src="bullet.js"></script>
 		<script type="text/javascript" src="player.js"></script>
 		<script type="text/javascript" src="connector.js"></script>
+		<script type="text/javascript" src="game.js"></script>
 		<script type="text/javascript" src="main.js"></script>
 
 	</body>

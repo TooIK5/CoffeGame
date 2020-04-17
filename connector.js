@@ -5,7 +5,7 @@ class SocketConnector {
 		this.isMock = isMock;
 	}
 
-	connect(onmessage) {
+	connect(onconnected, onmessage) {
 		if(this.isMock) {
 			this.mockConnect(onmessage);
 		    return;
@@ -20,6 +20,7 @@ class SocketConnector {
           console.log("Соединение установлено.");
 
           this.socket.send("Привет");
+          onconnected();
         };
 
         this.socket.onclose = function(event) {
@@ -32,7 +33,7 @@ class SocketConnector {
         };
 
         this.socket.onmessage = function(event) {
-          console.log("Получены данные " + event.data);
+          //console.log("Получены данные " + event.data);
           onmessage(event.data);
         };
 
@@ -52,11 +53,10 @@ class SocketConnector {
 
 	mockConnect(onmessage) {
 		this.players = [];
-		this.bullets = [];
 
 		for(let i = 0; i<4; i++) {
 		   let p = {};
-		   p.player = "A"+i;
+		   p.name = "A"+i;
 		   p.x = 0.1*i;
 		   p.y = 0.1*i;
 		   this.players.push(p);
@@ -70,15 +70,22 @@ class SocketConnector {
 		       p.y = p.y+0.0002*(i+1);
 	        }
 
-	        var obj = {};
-	        obj.players = this.players;
-	        
+	        let data = {};
+	        data.players = this.players;
 
-			var dat = JSON.stringify(this.players);
-			onmessage(dat);
+			onmessage(commandBody("state", data));
 		}
 
 		setInterval(cicle, 30);
+
+		let p = this.players[3];
+		let halfSize = PLAYER_SIZE_PERCENT/2;
+
+		let bulletCicle = (e)=> {
+			onmessage(commandBody("shot", {x:p.x+halfSize, y:p.y+halfSize, route:-0.4}));
+		}
+
+		setInterval(bulletCicle, 600);
 	}
 
 	mockSend(message) {

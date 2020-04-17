@@ -1,7 +1,9 @@
 class Bullet {
-	constructor(x, y, dx, dy){
-		this.h = 5;
-		this.w = 5;
+	constructor(x, y, dx, dy, damage) {
+		this.damage = damage;
+
+		this.h = BULLET_SIZE_PX*(1+damage/2.9);
+		this.w = BULLET_SIZE_PX*(1+damage/2.9);
 
 		this.cH = this.h/2;
 		this.cW = this.w/2;
